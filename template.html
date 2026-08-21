@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Beasts: Volume 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:            #16181c;
+    --bg-raised:     #1e2126;
+    --bg-sunken:     #101216;
+    --line:          #2a2e35;
+    --text:          #d7dde3;
+    --text-dim:      #7c8590;
+    --green:         #39ff8c;
+    --green-dim:     #1f7a4d;
+    --cyan:          #47f2ff;
+    --magenta:       #ff3ec9;
+    --amber:         #ffb545;
+    --tier1: var(--magenta);
+    --tier2: var(--amber);
+    --tier3: var(--cyan);
+    --tier4: var(--green);
+    --tier5: var(--text-dim);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  body{
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(57,255,140,0.06), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(71,242,255,0.05), transparent 40%);
+    background-attachment:fixed;
+  }
+
+  /* faint scanline texture over everything, kept subtle */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    z-index:1000;
+  }
+
+  header{
+    padding:3rem 1.5rem 2rem;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:var(--bg-sunken);
+  }
+
+  header h1{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(1.1rem, 4vw, 1.9rem);
+    color:var(--green);
+    text-shadow:0 0 12px rgba(57,255,140,0.55), 0 0 30px rgba(57,255,140,0.2);
+    margin:0 0 .75rem;
+    letter-spacing:1px;
+  }
+
+  header p{
+    margin:0;
+    color:var(--text-dim);
+    font-size:.85rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:2.5rem 1.25rem 5rem;
+  }
+
+  .class-section{
+    margin-bottom:3.5rem;
+  }
+
+  .class-heading{
+    display:flex;
+    align-items:center;
+    gap:.9rem;
+    margin-bottom:1.25rem;
+  }
+
+  .class-heading h2{
+    font-family:'Press Start 2P', monospace;
+    font-size:.95rem;
+    margin:0;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+
+  .class-heading .rule{
+    flex:1;
+    height:1px;
+    background:linear-gradient(to right, currentColor, transparent);
+    opacity:.5;
+  }
+
+  .class-heading .count{
+    font-size:.7rem;
+    color:var(--text-dim);
+    letter-spacing:1px;
+  }
+
+  .class-brute   { color: var(--magenta); }
+  .class-hunter  { color: var(--green); }
+  .class-magic   { color: var(--cyan); }
+
+  .beast-row{
+    display:grid;
+    /* grid-template-columns:180px 1fr; */
+    gap:1rem;
+    align-items:center;
+    padding:.85rem;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--bg-raised);
+    margin-bottom:.75rem;
+    /* skip layout/paint work for offscreen rows — big win on a 75-row page */
+    content-visibility:auto;
+    /* contain-intrinsic-size:auto 168px; */
+  }
+
+  .beast-row.is-placeholder{
+    border-style:dashed;
+    opacity:.7;
+  }
+
+  .beast-meta{
+    display:flex;
+    flex-direction:column;
+    gap:.35rem;
+    min-width:0;
+  }
+
+  .beast-name{
+    font-weight:700;
+    font-size:.95rem;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .tier-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    font-size:.65rem;
+    letter-spacing:1px;
+    padding:.15rem .5rem;
+    border-radius:999px;
+    width:fit-content;
+    border:1px solid currentColor;
+  }
+
+  .beast-forms{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:.75rem;
+  }
+
+  .card-slot{
+    position:relative;
+    aspect-ratio:250/350; /* matches the collectables card SVG's native ratio */
+    border-radius:8px;
+    background:var(--bg-sunken);
+    border:1px solid var(--line);
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .card-slot img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    image-rendering:pixelated;
+  }
+
+  /* @provable-games/collectables' renderBeastCardSvg() output */
+  .card-slot svg{
+    width:100%;
+    height:100%;
+  }
+
+  /* grayed-out placeholder card, used when a beast isn't finished yet */
+  .card-slot.placeholder{
+    filter:grayscale(1);
+    opacity:.35;
+  }
+  .card-slot.placeholder::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);
+  }
+  .card-slot.placeholder .placeholder-glyph{
+    font-size:1.6rem;
+    color:var(--text-dim);
+  }
+
+  .row-status{
+    font-size:.6rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .row-status.wip{ color: var(--amber); }
+
+  @media (max-width:640px){
+    .beast-row{
+      grid-template-columns:1fr;
+    }
+    .beast-forms{
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:.4rem;
+    }
+  }
+
+  footer{
+    text-align:center;
+    padding:2rem;
+    color:var(--text-dim);
+    font-size:.7rem;
+    border-top:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Beasts: Volume&nbsp;2</h1>
+  <p>75 beasts // brute · hunter · magic</p>
+</header>
+
+<main id="gallery"><!-- GALLERY --></main>
+
+<footer>static build</footer>
+</body>
+</html>
