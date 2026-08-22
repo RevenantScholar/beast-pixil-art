@@ -21,8 +21,8 @@ const TIER_VAR = { 1: "t1", 2: "t2", 3: "t3", 4: "t4", 5: "t5" };
 
 const FORMS = [
   { key: "static-regular", shiny: false, animated: false, label: "Static" },
-  { key: "animated-regular", shiny: false, animated: true, label: "Animated" },
   { key: "static-shiny", shiny: true, animated: false, label: "Shiny" },
+  { key: "animated-regular", shiny: false, animated: true, label: "Animated" },
   { key: "animated-shiny", shiny: true, animated: true, label: "Shiny · Anim" },
 ];
 
